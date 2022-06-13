@@ -30,4 +30,14 @@ public class UserContoller {
         }
         return R.success(userService.addUser(user));
     }
+
+    @PostMapping("/updateUser")
+    @ApiOperation("修改用户信息")
+    public R updateUser(User user) throws ServerException {
+        Integer rows = userService.updateUser(user);
+        if(rows == 0){
+            throw new ServerException("出现未知问题");
+        }
+        return R.success(rows);
+    }
 }

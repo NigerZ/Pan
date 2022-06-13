@@ -6,4 +6,5 @@ import java.rmi.ServerException;
 
 public interface IUserService {
     Boolean addUser(User user) throws ServerException;
+    Integer updateUser(User user);
 }

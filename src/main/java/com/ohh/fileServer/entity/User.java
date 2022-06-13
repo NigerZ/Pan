@@ -21,4 +21,5 @@ public class User implements Serializable {
     private Date updateTime;
     @TableLogic
     private Integer isDeleted;
+    private String salt;
 }

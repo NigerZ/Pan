@@ -9,11 +9,12 @@
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
         <result property="isDeleted" column="is_deleted"/>
+        <result property="salt" column="salt"/>
     </resultMap>
 
     <insert id="addUser">
-        insert into user (id, name, account, password, create_time, update_time, is_deleted)
-        values (#{id},#{name},#{account},#{password},#{createTime},#{updateTime},#{isDeleted})
+        insert into user (id, name, account, password, create_time, update_time, is_deleted, salt)
+        values (#{id},#{name},#{account},#{password},#{createTime},#{updateTime},#{isDeleted}, #{salt})
     </insert>
 
 
