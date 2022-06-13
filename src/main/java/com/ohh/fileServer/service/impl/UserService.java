@@ -7,6 +7,7 @@ import com.ohh.fileServer.mapper.UserMapper;
 import com.ohh.fileServer.service.IUserService;
 import com.ohh.fileServer.utils.MD5Util;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.rmi.ServerException;
@@ -20,6 +21,8 @@ import java.util.Date;
 public class UserService implements IUserService {
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 用户添加逻辑
@@ -36,12 +39,18 @@ public class UserService implements IUserService {
             //获取加密盐值
             String salt = MD5Util.getRandomSalt();
             //对密码加密
-            user.setPassword(MD5Util.toMD5(password + salt));
+            String md5Password = MD5Util.toMD5(password + salt);
+            user.setPassword(md5Password);
             //设置用户信息
             user.setSalt(salt);
             user.setName(user.getAccount());
             user.setIsDeleted(0);
-            return userMapper.addUser(user);
+            Boolean isSuccess = userMapper.addUser(user);
+            //创建用户成功，生成redis用户信息
+            if (isSuccess) {
+                redisTemplate.opsForValue().set(user.getAccount(),md5Password);
+            }
+            return isSuccess;
         }
         throw new ServerException("账号已存在");
     }
@@ -68,7 +77,12 @@ public class UserService implements IUserService {
                 MD5Util.toMD5(user.getPassword() + result.getSalt()));
         userUpdateWrapper.set(!StringUtils.isEmpty(user.getName()), "name", user.getName());
         userUpdateWrapper.set("update_time",new Date());
-        return userMapper.update(user,userUpdateWrapper);
+        int rows = userMapper.update(user, userUpdateWrapper);
+        //更新redis的密码
+        if(rows > 0 && !StringUtils.isEmpty(user.getPassword())){
+            redisTemplate.opsForValue().set(user.getAccount(),MD5Util.toMD5(user.getPassword() + result.getSalt()));
+        }
+        return rows;
     }
 
 }
