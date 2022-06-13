@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ohh.fileServer.mapper.IUserMapper">
+    <resultMap id="userMap" type="com.ohh.fileServer.entity.User">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="account" column="account"/>
+        <result property="password" column="password"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="isDeleted" column="is_deleted"/>
+    </resultMap>
+
+    <insert id="addUser">
+        insert into user (id, name, account, password, create_time, update_time, is_deleted)
+        values (#{id},#{name},#{account},#{password},#{createTime},#{updateTime},#{isDeletd})
+    </insert>
+
+
+    <select id="findUserByAccount" parameterType="java.lang.String" resultMap="userMap">
+        select * from user where account = #{account} and is_deleted = 0
+    </select>
+</mapper>

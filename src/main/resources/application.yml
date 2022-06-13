@@ -46,10 +46,12 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     auto-mapping-behavior: full
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    mapper-location: classpath*:mapper/**/*mapper.xml
+    mapper-location: classpath*:mapper/*mapper.xml
     global-config:
       db-config:
         logic-delete-field: isDeleted
         logic-not-delete-value: 0
         logic-delete-value: 1
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.ohh.fileServer.entity
 
