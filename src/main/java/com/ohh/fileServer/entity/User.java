@@ -5,18 +5,20 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @TableName(value = "user")
 public class User implements Serializable {
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(type = IdType.ID_WORKER)
     private Long id;
     private String name;
     private String account;
     private String password;
     @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
+    private Date createTime;
     @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime updateTime;
+    private Date updateTime;
+    @TableLogic
     private Integer isDeleted;
 }

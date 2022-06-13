@@ -5,7 +5,7 @@ import com.ohh.fileServer.entity.User;
 import org.mapstruct.Mapper;
 
 @Mapper
-public interface IUserMapper extends BaseMapper<User> {
+public interface UserMapper extends BaseMapper<User> {
     Boolean addUser(User user);
     User findUserByAccount(String account);
 }
