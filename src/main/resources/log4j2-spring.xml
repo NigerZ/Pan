@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="warn" monitorInterval="60" strict="true">
+    <Properties>
+        <Property name="base.dir">logs</Property>
+        <Property name="info.file.name">system</Property>
+        <Property name="error.file.name">error</Property>
+        <Property name="layout.pattern">%d{yyyy-MM-dd HH:mm:ss,SSS} | %p | %t | %c{2} |- %m%n
+        </Property>
+        <Property name="file.max.age">180d</Property>
+        <Property name="log_info_level">info</Property>
+        <Property name="log_debug_level">debug</Property>
+        <Property name="log_error_level">error</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout charset="UTF-8" pattern="${layout.pattern}"/>
+        </Console>
+
+        <RollingFile name="FILE_INFO" fileName="${base.dir}/${info.file.name}.log"
+                     filePattern="${base.dir}/${info.file.name}.%d{yyyy-MM-dd}-%i.log.gz">
+
+            <Filters>
+                <ThresholdFilter level="${log_debug_level}" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <PatternLayout charset="UTF-8" pattern="${layout.pattern}"/>
+
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="1G"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${base.dir}" maxDepth="1" followLinks="true">
+                    <IfFileName glob="${info.file.name}*.gz"/>
+                    <IfLastModified age="${file.max.age}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="FILE_ERROR" fileName="${base.dir}/${error.file.name}.log"
+                     filePattern="${base.dir}/${error.file.name}.%d{yyyy-MM-dd}-%i.log.gz">
+
+            <Filters>
+                <ThresholdFilter level="${log_error_level}" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+
+            <PatternLayout charset="UTF-8" pattern="${layout.pattern}"/>
+            <Policies>
+                <OnStartupTriggeringPolicy/>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="200MB"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${base.dir}" maxDepth="1" followLinks="true">
+                    <IfFileName glob="${error.file.name}*.gz"/>
+                    <IfLastModified age="${file.max.age}"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- 这里的name记得改为自己项目对应的package -->
+        <AsyncLogger name="com.panziye" level="DEBUG" additivity="false">
+            ${mvn.log.appenders}
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FILE_INFO"/>
+            <AppenderRef ref="FILE_ERROR"/>
+        </AsyncLogger>
+
+        <AsyncRoot level="INFO">
+            ${mvn.log.appenders}
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="FILE_INFO"/>
+            <AppenderRef ref="FILE_ERROR"/>
+        </AsyncRoot>
+    </Loggers>
+</configuration>
