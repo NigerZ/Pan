@@ -1,6 +1,7 @@
 package com.ohh.fileServer.service.impl;
 
 import com.alibaba.druid.util.StringUtils;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.ohh.fileServer.entity.User;
 import com.ohh.fileServer.mapper.UserMapper;
@@ -83,6 +84,22 @@ public class UserService implements IUserService {
             redisTemplate.opsForValue().set(user.getAccount(),MD5Util.toMD5(user.getPassword() + result.getSalt()));
         }
         return rows;
+    }
+
+    /**
+     * 删除用户
+     * @param user
+     * @return
+     */
+    @Override
+    public Integer deleteUser(User user) {
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        userQueryWrapper.eq("account", user.getAccount());
+        int delete = userMapper.delete(userQueryWrapper);
+        if(delete > 0){
+            redisTemplate.opsForValue().getAndDelete(user.getAccount());
+        }
+        return delete;
     }
 
 }

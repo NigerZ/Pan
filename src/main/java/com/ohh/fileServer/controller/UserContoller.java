@@ -40,4 +40,9 @@ public class UserContoller {
         }
         return R.success(rows);
     }
+    @PostMapping("deleteUser")
+    @ApiOperation("删除用户信息")
+    public R deleteUser(User user){
+        return R.success(userService.deleteUser(user));
+    }
 }
