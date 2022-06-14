@@ -6,6 +6,7 @@ import com.ohh.fileServer.service.IUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import java.rmi.ServerException;
 @RestController
 @RequestMapping("/user")
 @Api("用户controller")
+@CrossOrigin
 public class UserContoller {
     @Autowired
     private IUserService userService;
@@ -48,7 +50,10 @@ public class UserContoller {
 
     @PostMapping("/login")
     @ApiOperation("登录")
-    public R login(User user){
+    public R login(String account, String password){
+        User user = new User();
+        user.setAccount(account);
+        user.setPassword(password);
         return R.success(userService.login(user));
     }
 }

@@ -10,6 +10,7 @@ import com.ohh.fileServer.utils.MD5Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.rmi.ServerException;
 import java.util.Collections;
