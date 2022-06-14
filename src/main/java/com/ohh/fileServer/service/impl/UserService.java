@@ -12,7 +12,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.rmi.ServerException;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * 用户业务类
@@ -49,7 +51,9 @@ public class UserService implements IUserService {
             Boolean isSuccess = userMapper.addUser(user);
             //创建用户成功，生成redis用户信息
             if (isSuccess) {
-                redisTemplate.opsForValue().set(user.getAccount(),md5Password);
+//                redisTemplate.opsForValue().set(user.getAccount(),md5Password);
+                redisTemplate.opsForHash().put(user.getAccount(),"password", md5Password);
+                redisTemplate.opsForHash().put(user.getAccount(),"salt", salt);
             }
             return isSuccess;
         }
@@ -81,7 +85,8 @@ public class UserService implements IUserService {
         int rows = userMapper.update(user, userUpdateWrapper);
         //更新redis的密码
         if(rows > 0 && !StringUtils.isEmpty(user.getPassword())){
-            redisTemplate.opsForValue().set(user.getAccount(),MD5Util.toMD5(user.getPassword() + result.getSalt()));
+//            redisTemplate.opsForValue().set(user.getAccount(),MD5Util.toMD5(user.getPassword() + result.getSalt()));
+            redisTemplate.opsForHash().put(user.getAccount(), "password", MD5Util.toMD5(user.getPassword() + result.getSalt()));
         }
         return rows;
     }
@@ -97,9 +102,62 @@ public class UserService implements IUserService {
         userQueryWrapper.eq("account", user.getAccount());
         int delete = userMapper.delete(userQueryWrapper);
         if(delete > 0){
-            redisTemplate.opsForValue().getAndDelete(user.getAccount());
+//            redisTemplate.opsForValue().getAndDelete(user.getAccount());
+            redisTemplate.opsForHash().delete(user.getAccount());
         }
         return delete;
+    }
+
+    /**
+     * 用户的登录逻辑
+     * @param user
+     * @return
+     */
+
+    @Override
+    public Boolean login(User user) {
+        //获取用户输入的账号密码
+        String account = user.getAccount();
+        String password = user.getPassword();
+        //从redis中获取用户信息
+        Map<Object, Object> resultMap = redisTemplate.opsForHash().entries(account);
+        //判断redis是否存在
+        if(!resultMap.isEmpty()){
+            String mapPassword = resultMap.get("password").toString();
+            String salt = resultMap.get("salt").toString();
+            if (MD5Util.toMD5(password + salt).equals(mapPassword)) {
+                return true;
+            }else {
+                try {
+                    throw new ServerException("密码错误");
+                } catch (ServerException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        //redis中没有记录，从数据库中搜索
+        User result = userMapper.findUserByAccount(account);
+        if (user ==null) {
+            try {
+                throw new ServerException("用户不存在");
+            } catch (ServerException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        String salt = result.getSalt();
+        String resultPassword = result.getPassword();
+        if(MD5Util.toMD5(password + salt).equals(resultPassword)){
+            //将用户信息重新存入redis中
+            redisTemplate.opsForHash().put(account,"password", resultPassword);
+            redisTemplate.opsForHash().put(account,"salt", salt);
+            return true;
+        }else {
+            try {
+                throw new ServerException("密码错误");
+            } catch (ServerException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
 }

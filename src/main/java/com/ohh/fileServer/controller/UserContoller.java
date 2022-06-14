@@ -45,4 +45,10 @@ public class UserContoller {
     public R deleteUser(User user){
         return R.success(userService.deleteUser(user));
     }
+
+    @PostMapping("/login")
+    @ApiOperation("登录")
+    public R login(User user){
+        return R.success(userService.login(user));
+    }
 }

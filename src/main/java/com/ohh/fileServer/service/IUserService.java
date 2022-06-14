@@ -9,4 +9,6 @@ public interface IUserService {
     Integer updateUser(User user);
 
     Integer deleteUser(User user);
+
+    Boolean login(User user);
 }
